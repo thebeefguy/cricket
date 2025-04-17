@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Setup</title>
+  <link rel="stylesheet" href="style/setup.css">
+  <!-- TO DO: Include base stylesheet later -->
+  <script src="score.js"></script>
+</head>
+<body>
+  <form id="setupForm">
+    <h2>Match Setup</h2>
+    <input type="text" id="team1" placeholder="Team 1 Name" required>
+    <input type="text" id="team2" placeholder="Team 2 Name" required>
+    <select id="tossWinner" required>
+      <option value="">Select Toss Winner</option>
+      <option value="team1">Team 1</option>
+      <option value="team2">Team 2</option>
+    </select>
+    <select id="tossDecision" required>
+      <option value="">Select Toss Decision</option>
+      <option value="bat">Bat</option>
+      <option value="bowl">Bowl</option>
+    </select>
+    <button type="submit">Start Match</button>
+  </form>
+</body>
+</html>
+
+
