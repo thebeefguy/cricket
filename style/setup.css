@@ -1,0 +1,32 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background: FloralWhite;
+}
+
+form {
+  width: 40%;
+  max-width: 300px; 
+  background: White;
+  padding: 20px 30px;
+  border: 1px solid Gray;
+  border-radius: 2px;
+  text-align: center;
+}
+
+input, select {
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+  padding: 8px;
+  text-align: center;
+}
+
+button {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
