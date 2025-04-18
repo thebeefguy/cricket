@@ -1,111 +1,142 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const setupForm = document.getElementById("setupForm");
-  if (setupForm) {
-    setupForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const team1Name = document.getElementById("team1").value;
-      const team2Name = document.getElementById("team2").value;
-      const tossWinner = document.getElementById("tossWinner").value;
-      const tossDecision = document.getElementById("tossDecision").value;
-
-      const team1 = {
-        name: team1Name,
-        score: {
-          runs: 0,
-          wickets: 0,
-          balls: 0
-        },
-        players: [],
-        bowlers: []
-      };
-
-      const team2 = {
-        name: team2Name,
-        score: {
-          runs: 0,
-          wickets: 0,
-          balls: 0
-        },
-        players: [],
-        bowlers: []
-      };
-
-      const matchDetails = {
-        teams: [team1, team2],
-        tossWinner: tossWinner,
-        tossDecision: tossDecision,
-        currentInnings: 1,
-        overs: 2
-      };
-
-      const battingIndex = tossWinner === "team1" && tossDecision === "bat" ? 0 : 1;
-      matchDetails.teams[battingIndex].isBatting = true;
-      matchDetails.teams[1 - battingIndex].isBowling = true;
-
-      const strikeBatterName = prompt("Enter Strike Batter Name:");
-      const nonStrikeBatterName = prompt("Enter Non-Strike Batter Name:");
-      const currentBowlerName = prompt("Enter First Bowler Name:");
-
-      if (!strikeBatterName || !nonStrikeBatterName || !currentBowlerName) {
-        alert("All player names must be entered.");
-        return;
-      }
-
-      matchDetails.teams[battingIndex].players.push(
-        { name: strikeBatterName, isStrike: true, runs: 0, balls: 0, fours: 0, sixes: 0 },
-        { name: nonStrikeBatterName, isStrike: false, runs: 0, balls: 0, fours: 0, sixes: 0 }
-      );
-
-      matchDetails.teams[1 - battingIndex].bowlers.push(
-        { name: currentBowlerName, overs: 0, maidens: 0, runs: 0, wickets: 0, isBowling: true }
-      );
-
-      console.log("Match Details:", matchDetails);
-      localStorage.setItem("matchDetails", JSON.stringify(matchDetails));
-
-      window.location.href = "./live.html";
-    });
-  }
+  if (setupForm) setupForm.addEventListener("submit", handleSetup);
 });
 
-function addRun(runs) {
-  let matchDetails = JSON.parse(localStorage.getItem("matchDetails"));
+function handleSetup(e) {
+  e.preventDefault();
 
-  const battingTeam = matchDetails.teams.find(team => team.isBatting);
-  const bowlingTeam = matchDetails.teams.find(team => team.isBowling);
-  const strikeBatter = battingTeam.players.find(player => player.isStrike);
+  const team1Name   = document.getElementById("team1").value.trim();
+  const team2Name   = document.getElementById("team2").value.trim();
+  const tossWinner  = document.getElementById("tossWinner").value;
+  const tossDecision= document.getElementById("tossDecision").value;
 
-  battingTeam.score.runs += runs;
-  battingTeam.score.balls++;
-  strikeBatter.runs += runs;
-  strikeBatter.balls++;
-  if (runs === 4) strikeBatter.fours++;
-  if (runs === 6) strikeBatter.sixes++;
+  const createTeam = name => ({
+    name,
+    score: { runs: 0, wickets: 0, balls: 0 },
+    players: {
+      onField: [],
+      out: []
+    },
+    bowlers: []
+  });
 
-  if (runs % 2 === 1) {
-    const nonStrikeBatter = battingTeam.players.find(player => !player.isStrike);
-    strikeBatter.isStrike = false;
-    nonStrikeBatter.isStrike = true;
+  const team1 = createTeam(team1Name);
+  const team2 = createTeam(team2Name);
+
+  const matchDetails = {
+    teams: [ team1, team2 ],
+    battingIndex:
+      tossWinner === "team1"
+        ? (tossDecision === "bat" ? 0 : 1)
+        : (tossDecision === "bat" ? 1 : 0),
+    currentInnings: 1,
+    overs: 2
+  };
+
+  const battingTeam  = matchDetails.teams[matchDetails.battingIndex];
+  const bowlingTeam  = matchDetails.teams[1 - matchDetails.battingIndex];
+
+  const strikeName     = prompt("Enter Strike Batter Name:");
+  const nonStrikeName  = prompt("Enter Non-Strike Batter Name:");
+  const bowlerName     = prompt("Enter First Bowler Name:");
+
+  if (!strikeName || !nonStrikeName || !bowlerName) {
+    alert("All names are required.");
+    return;
   }
 
-  if (battingTeam.score.balls % 6 === 0) {
-    const currentBowler = bowlingTeam.bowlers.find(bowler => bowler.isBowling);
-    currentBowler.overs++;
+  battingTeam.players.onField.push(
+    { name: strikeName,    isStrike: true,  isOut: false, runs: 0, balls: 0, fours: 0, sixes: 0 },
+    { name: nonStrikeName, isStrike: false, isOut: false, runs: 0, balls: 0, fours: 0, sixes: 0 }
+  );
 
-    const newBowlerName = prompt("Over complete! Enter next bowler name:");
-    bowlingTeam.bowlers.forEach(bowler => (bowler.isBowling = false));
-    bowlingTeam.bowlers.push({
-      name: newBowlerName,
-      overs: 0,
-      maidens: 0,
+  bowlingTeam.bowlers.push({
+    name: bowlerName,
+    isBowling: true,
+    overs: 0,
+    maidens: 0,
+    runs: 0,
+    wickets: 0
+  });
+
+  localStorage.setItem("matchDetails", JSON.stringify(matchDetails));
+  window.location.href = "./live.html";
+}
+
+function addRun(runs) {
+  const md = JSON.parse(localStorage.getItem("matchDetails"));
+  const bt = md.teams[md.battingIndex];
+  const bk = md.teams[1 - md.battingIndex];
+
+  const striker    = bt.players.onField.find(p => p.isStrike);
+  const nonStriker = bt.players.onField.find(p => !p.isStrike);
+  const bowler     = bk.bowlers.find(b => b.isBowling);
+
+  bt.score.runs  += runs;
+  bt.score.balls += 1;
+  striker.runs  += runs;
+  striker.balls += 1;
+  if (runs === 4) striker.fours++;
+  if (runs === 6) striker.sixes++;
+
+  if (runs % 2 === 1) {
+    striker.isStrike    = false;
+    nonStriker.isStrike = true;
+  }
+
+  if (bt.score.balls % 6 === 0) {
+    bowler.overs++;
+    const nextBowler = prompt("Over complete! Enter next bowler:");
+    if (nextBowler) {
+      bk.bowlers.forEach(b => b.isBowling = false);
+      bk.bowlers.push({
+        name: nextBowler,
+        isBowling: true,
+        overs: 0,
+        maidens: 0,
+        runs: 0,
+        wickets: 0
+      });
+    }
+  }
+
+  localStorage.setItem("matchDetails", JSON.stringify(md));
+  if (typeof updateLiveDisplay === "function") updateLiveDisplay();
+}
+
+function recordWicket() {
+  const md = JSON.parse(localStorage.getItem("matchDetails"));
+  const bt = md.teams[md.battingIndex];
+  const bk = md.teams[1 - md.battingIndex];
+
+  const striker = bt.players.onField.find(p => p.isStrike);
+  const bowler  = bk.bowlers.find(b => b.isBowling);
+
+  striker.isOut = true;
+  bt.players.out.push(striker);
+  bt.players.onField = bt.players.onField.filter(p => p !== striker);
+  bt.score.wickets++;
+
+  bowler.wickets++;
+
+  const newBatter = prompt("Wicket! Enter new batter:");
+  if (newBatter) {
+    bt.players.onField.push({
+      name: newBatter,
+      isStrike: true,
+      isOut: false,
       runs: 0,
-      wickets: 0,
-      isBowling: true
+      balls: 0,
+      fours: 0,
+      sixes: 0
+    });
+    bt.players.onField.forEach(p => {
+      if (p.name !== newBatter) p.isStrike = false;
     });
   }
 
-  console.log("Updated Match Details:", matchDetails);
-  localStorage.setItem("matchDetails", JSON.stringify(matchDetails));
+  localStorage.setItem("matchDetails", JSON.stringify(md));
+  if (typeof updateLiveDisplay === "function") updateLiveDisplay();
 }
 
