@@ -102,7 +102,7 @@ function addRun(runs) {
   }
 
   localStorage.setItem("matchDetails", JSON.stringify(md));
-  if (typeof updateLiveDisplay === "function") updateLiveDisplay();
+  updateLiveDisplay();
 }
 
 function recordWicket() {
@@ -137,6 +137,80 @@ function recordWicket() {
   }
 
   localStorage.setItem("matchDetails", JSON.stringify(md));
-  if (typeof updateLiveDisplay === "function") updateLiveDisplay();
+  updateLiveDisplay();
+}
+function updateOverallScores() {
+  const md = JSON.parse(localStorage.getItem("matchDetails"));
+  const bt = md.teams[md.battingIndex];
+  const bk = md.teams[1 - md.battingIndex];
+
+  const overs = Math.floor(bt.score.balls / 6);
+  const balls = bt.score.balls % 6;
+  const firstInnings = md.currentInnings === 1;
+
+  const scoreDisplay = document.getElementById("scoreDisplay");
+  if (firstInnings) {
+    scoreDisplay.textContent = `${bt.name} ${bt.score.runs}/${bt.score.wickets} (${overs}.${balls}) vs. ${bk.name}`;
+  } else {
+    const bkOvers = Math.floor(bk.score.balls / 6);
+    const bkBalls = bk.score.balls % 6;
+    scoreDisplay.textContent = `${bt.name} ${bt.score.runs}/${bt.score.wickets} (${overs}.${balls}) vs. ${bk.name} ${bk.score.runs}/${bk.score.wickets} (${bkOvers}.${bkBalls})`;
+  }
+}
+
+function updateBatterTable() {
+  const md = JSON.parse(localStorage.getItem("matchDetails"));
+  const bt = md.teams[md.battingIndex];
+  const batterTable = document.querySelector("#battersTable tbody");
+
+  const strikeBatter = bt.players.onField.find(p => p.isStrike);
+  const nonStrikeBatter = bt.players.onField.find(p => !p.isStrike);
+
+  const calculateStrikeRate = (runs, balls) => (balls > 0 ? ((runs / balls) * 100).toFixed(2) : "0.00");
+
+  batterTable.innerHTML = `
+    <tr>
+      <td>${strikeBatter.name}</td>
+      <td>${strikeBatter.runs}</td>
+      <td>${strikeBatter.balls}</td>
+      <td>${strikeBatter.fours}</td>
+      <td>${strikeBatter.sixes}</td>
+      <td>${calculateStrikeRate(strikeBatter.runs, strikeBatter.balls)}</td>
+    </tr>
+    <tr>
+      <td>${nonStrikeBatter.name}</td>
+      <td>${nonStrikeBatter.runs}</td>
+      <td>${nonStrikeBatter.balls}</td>
+      <td>${nonStrikeBatter.fours}</td>
+      <td>${nonStrikeBatter.sixes}</td>
+      <td>${calculateStrikeRate(nonStrikeBatter.runs, nonStrikeBatter.balls)}</td>
+    </tr>
+  `;
+}
+
+function updateBowlingSection() {
+  const md = JSON.parse(localStorage.getItem("matchDetails"));
+  const bk = md.teams[1 - md.battingIndex];
+  const bowler = bk.bowlers.find(b => b.isBowling);
+  const bowlingSection = document.getElementById("bowlerStats");
+
+  const calculateEconomyRate = (runs, overs) => (overs > 0 ? (runs / overs).toFixed(2) : "0.00");
+
+  bowlingSection.innerHTML = `
+    <p>${bowler.name}</p>
+    <ul>
+      <li>Overs: ${bowler.overs}</li>
+      <li>Maidens: ${bowler.maidens}</li>
+      <li>Runs Conceded: ${bowler.runs}</li>
+      <li>Wickets: ${bowler.wickets}</li>
+      <li>Economy Rate: ${calculateEconomyRate(bowler.runs, bowler.overs)}</li>
+    </ul>
+  `;
+}
+
+function updateLiveDisplay() {
+  updateOverallScores();
+  updateBatterTable();
+  updateBowlingSection();
 }
 
