@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const battingScorecard = document.getElementById("battingScorecard");
     const bowlingScorecard = document.getElementById("bowlingScorecard");
     if (battingScorecard && bowlingScorecard) updateScorecard();
+    if ( document.getElementById("matchResult") ) {
+        console.log("summary!")
+        displayResult();
+    }
 });
 
 function handleSetup(e) {
@@ -79,11 +83,27 @@ function startInnings(){
 }
 
 
+function checkScore(){
+    const md = JSON.parse(localStorage.getItem("matchDetails"));
+    const bt = md.teams[md.battingIndex];
+    const bk = md.teams[1 - md.battingIndex];
+    
+    if (bt.score.runs > bk.score.runs){
+        alert("Match over!");
+        window.location.href = "summary.html";
+    }
+}
+
 function handleBall(){
     const md = JSON.parse(localStorage.getItem("matchDetails"));
     const bt = md.teams[md.battingIndex];
     const bk = md.teams[1 - md.battingIndex];
     const bowler     = bk.bowlers.find(b => b.isBowling);
+    
+    if (md.currentInnings === 2){
+        console.log("Checking score");
+        checkScore();
+    }
 
     maxBalls = md.overs * 6;
     if (bt.score.balls >= maxBalls || bt.score.wickets == 10){
@@ -94,7 +114,10 @@ function handleBall(){
             alert(`${bt.name}'s innings is over!`);
             startInnings();
         }
-        else{alert('Match over!')}
+        else{
+            alert('Match over!');
+            window.location.href = "summary.html"
+        }
     }
     else if (bt.score.balls % 6 === 0) {
         bowler.overs++;
@@ -310,6 +333,31 @@ function updateScorecard(){
 
 function displayResult(){
     const md = JSON.parse(localStorage.getItem("matchDetails"));
+    const bt = md.teams[md.battingIndex];
+    const bk = md.teams[1 - md.battingIndex];
+    const resultElement = document.getElementById("matchResult");
 
-    if(md.teams[0].score.runs > md.teams[1].score.runs){}
+    if(bt.score.runs > bk.score.runs){
+        const wicketsLeft = 10 - bt.score.wickets;
+        const ballsLeft = (md.overs * 6) - bt.score.balls;
+        resultMessage = `${bt.name} wins by ${wicketsLeft} wickets (${ballsLeft} balls left)!`;
+    }
+    else if(bt.score.runs < bk.score.runs){
+        const runDifference = bk.score.runs - bt.score.runs;
+        resultMessage = `${bk.name} wins by ${runDifference} runs!`;
+    }
+    else{resultMessage = "It's a tie!";}
+
+    resultElement.innerHTML = `
+    <h2>Match Result</h2>
+    <p><strong>${bk.name}:</strong> ${bk.score.runs}</p>
+    <p><strong>${bt.name}:</strong> ${bt.score.runs}</p>
+    <h3>${resultMessage}</h3>
+  `;
+
+}
+
+function resetMatch() {
+    localStorage.clear();
+    window.location.href = "./setup.html";
 }
