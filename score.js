@@ -24,7 +24,7 @@ function handleSetup(e) {
 
     const createTeam = name => ({
         name,
-        score: { runs: 0, wickets: 0, balls: 0 },
+        score: { runs: 0, wickets: 0, balls: 0, extras: 0},
         players: {
             onField: [],
             out: []
@@ -100,6 +100,7 @@ function handleBall(){
     const bk = md.teams[1 - md.battingIndex];
     const bowler     = bk.bowlers.find(b => b.isBowling);
     
+    if(md.freeHit){md.freeHit=false;document.getElementById("wicket").removeAttribute("disabled");}
     if (md.currentInnings === 2){
         console.log("Checking score");
         checkScore();
@@ -121,6 +122,7 @@ function handleBall(){
     }
     else if (bt.score.balls % 6 === 0) {
         bowler.overs++;
+        if (bowler.runs === 0) {bowler.maidens++;}
         const nextBowler = prompt("Over complete! Enter next bowler:");
         if (nextBowler) {
             bk.bowlers.forEach(b => b.isBowling = false);
@@ -152,6 +154,7 @@ function addRun(runs) {
     bt.score.balls += 1;
     striker.runs  += runs;
     striker.balls += 1;
+    bowler.runs += runs;
     if (runs === 4) striker.fours++;
     if (runs === 6) striker.sixes++;
 
@@ -161,10 +164,61 @@ function addRun(runs) {
     }
 
     localStorage.setItem("matchDetails", JSON.stringify(md));
-    handleBall();
-
     updateLiveDisplay();
+    handleBall();
 }
+
+//extras
+function addExtra(type, runs=1) {
+    const md = JSON.parse(localStorage.getItem("matchDetails"));
+    bt = md.teams[md.battingIndex], bk = md.teams[1-md.battingIndex];
+    const bowler = bk.bowlers.find(b=>b.isBowling), striker = bt.players.onField.find(p=>p.isStrike);
+    switch(type){
+        case "wide":
+            bt.score.runs++; 
+            break;
+        case "no-ball":
+            bt.score.runs++; bt.score.balls++; md.freeHit=true; document.getElementById("wicket").setAttribute("disabled", true); 
+            break;
+        case "bye":
+            bt.score.runs+=runs;
+            break;
+        case "leg-bye":
+            bt.score.runs+=runs; bt.score.balls++;
+            break;
+    }
+    bt.score.extras+=runs;
+    localStorage.setItem("matchDetails", JSON.stringify(md));
+    updateLiveDisplay();
+
+}
+
+//runout
+function recordRunOut(runs) {
+    const md = JSON.parse(localStorage.getItem("matchDetails"));
+    bt = md.teams[md.battingIndex], bk = md.teams[1-md.battingIndex];
+    const bowler = bk.bowlers.find(b=>b.isBowling),
+        striker= bt.players.onField.find(p=>p.isStrike),
+        nonStr = bt.players.onField.find(p=>!p.isStrike),
+        outBatter = runs%2? nonStr : striker;
+
+    outBatter.isOut=true;
+    bt.players.out.push(outBatter);
+    bt.players.onField = bt.players.onField.filter(p=>p!==outBatter);
+    bt.score.runs+=runs; bt.score.wickets++; bt.score.balls++;
+    bowler.wickets++;
+    striker.runs+=runs;
+
+    const nxt = prompt("Enter new batter:");
+    if (nxt) {
+        bt.players.onField.push({ name:nxt, isStrike:true, isOut:false, runs:0, balls:0, fours:0, sixes:0 });
+        bt.players.onField.forEach(p=>{ if(p.name!==nxt) p.isStrike=false });
+    }
+    localStorage.setItem("matchDetails", JSON.stringify(md));
+    updateLiveDisplay();
+    handleBall();
+}
+
 
 function recordWicket() {
     const md = JSON.parse(localStorage.getItem("matchDetails"));
@@ -199,9 +253,8 @@ function recordWicket() {
     }
 
     localStorage.setItem("matchDetails", JSON.stringify(md));
-    handleBall();
-
     updateLiveDisplay();
+    handleBall();
 }
 
 function updateOverallScores() {
@@ -263,13 +316,11 @@ function updateBowlingSection() {
 
     bowlingSection.innerHTML = `
         <p>${bowler.name}</p>
-        <ul>
-        <li>Overs: ${bowler.overs}</li>
-        <li>Maidens: ${bowler.maidens}</li>
-        <li>Runs Conceded: ${bowler.runs}</li>
-        <li>Wickets: ${bowler.wickets}</li>
-        <li>Economy Rate: ${calculateEconomyRate(bowler.runs, bowler.overs)}</li>
-        </ul>
+        Overs: ${bowler.overs}<br>
+        Maidens: ${bowler.maidens}<br>
+        Runs Conceded: ${bowler.runs}<br>
+        Wickets: ${bowler.wickets}<br>
+        Economy Rate: ${calculateEconomyRate(bowler.runs, bowler.overs)}</br>
         `;
 }
 

@@ -4,16 +4,11 @@ table {
   margin-bottom: 20px;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
+
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically (if necessary) */
+  margin-top: 20px; /* Adds spacing above the button */
 }
-
-button {
-  padding: 10px 15px;
-  margin-bottom: 20px;
-  cursor: pointer;
-}
-
-

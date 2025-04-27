@@ -1,0 +1,94 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f8f9fa;
+  color: #212529;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-align: center;
+  color: #2c3e50;
+  font-weight: 600;
+}
+h3 {
+  color: #5a87c6;
+  border-bottom: 2px solid #5a87c6;
+  padding-bottom: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  text-align: center;
+}
+
+th {
+  background: #5a87c6;
+  color: #ffffff;
+}
+
+button {
+  background: #5a87c6; /* Muted blue for primary action */
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: #4a78b3; /* Slightly darker muted blue on hover */
+  transform: translateY(-2px);
+}
+
+button:focus {
+  outline: 2px solid #4a78b3;
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+    transform: none;
+  transition: background 0.3s ease;   cursor: not-allowed; 
+input, select {
+  background: #ffffff;
+  color: #495057;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+input::placeholder {
+  color: #adb5bd;
+}
+
+a {
+  color: #5a87c6; /* Matches button color */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #4a78b3; /* Matches button hover color */
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+

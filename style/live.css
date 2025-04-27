@@ -1,30 +1,41 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f9f9f9;
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding-bottom: 120px;
 }
 
-#scoreDisplay {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-table {
+#scoringPanel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+  padding: 10px 20px;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
+#bowlerStats,
+#scoreDisplay {
+    text-align: center;
 }
 
-#scoringButtons button {
-  margin: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
+#scoringButtons,
+#actionButtons,
+#runOutSection {
+  display: flex;
+  gap: 8px;
 }
 
+#byeRuns, #legByeRuns, #runOutRuns {
+  width: 80px;
+}
 
+.button-container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically (if necessary) */
+  margin-top: 20px; /* Adds spacing above the button */
+}
